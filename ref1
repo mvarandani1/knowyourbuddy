@@ -1,0 +1,68 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>HipoInsights</title>
+    @Styles.Render("~/bundles/AdminStyle")
+    @Styles.Render("~/Datatable/css")
+    @Scripts.Render("~/bundles/AdminScript")
+    @Scripts.Render("~/bundles/Datatable")
+</head>
+
+@{
+    Layout = null;
+}
+
+<body>
+    <div id="wrapper">
+        <!-- HEADER start -->
+        <header class="header">
+            <a href="#" class="toggle-sidebar"> <i class="menu-icon"> <span class="line1"></span> <span class="line2"></span> <span class="line3"></span> </i> </a>
+            <div class="logo"><a href="#"><img src="~/Areas/HipoAdmin/images/logo-inner.png" alt="Enterprise Workflow"></a></div>
+            <div class="main-navigation">
+                <ul class="navigation navi">
+                    <li @*class="active"*@>
+                        <a href="@Url.Action("Index", "Dashboard", new { area = "HipoAdmin" })"><span></span>Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index", "Company", new { area = "HipoAdmin" })"><span></span>Companies</a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index", "Project", new { area = "HipoAdmin" })"><span></span>Projects</a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index", "Role", new { area = "HipoAdmin" })"><span></span>Roles</a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Index", "Department", new { area = "HipoAdmin" })"><span></span>Departments</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="header-right">
+                <div class="userinfo">
+                    <a href="#" class="userlink" id="usermenu" data-toggle="dropdown"><img src="~/Areas/HipoAdmin/images/user-small.png" alt=""><span></span></a>
+                    <ul class="dropdown-menu usermenubox" aria-labelledby="usermenu">
+                        <li><a href="#"><img src="~/Areas/HipoAdmin/images/ic-user.png" alt="">My Profile</a></li>
+                        <li><a href="@Url.Action("Logout", "Login")"><img src="~/Areas/HipoAdmin/images/ic-logout.png" alt="">Logout</a></li>
+                    </ul>
+                </div>
+                <div class="alertlist"><a href="#" class="notelink"><span>4</span></a></div>
+            </div>
+        </header>
+        <!-- HEADER end -->
+
+        @RenderBody()
+
+        <!-- FOOTER start -->
+        <footer class="footer"> Copyright All Rights Reserved &copy; @DateTime.Now.Year </footer>
+        <!-- FOOTER end -->
+
+        <div class="overlay"></div>
+    </div>
+
+</body>
+</html>
