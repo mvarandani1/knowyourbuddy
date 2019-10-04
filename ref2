@@ -1,0 +1,185 @@
+
+@model HipoInsights.Domain.Companies.Company
+
+@{
+    Layout = "~/Areas/HipoAdmin/Views/Shared/_AdminLayout.cshtml";
+
+}
+
+<style>
+    body .form-group{
+        height: 90px;
+    }
+</style>
+
+<!-- CONTENT start -->
+<div class="main-content">
+    <div class="rightside">
+        <div class="page-title">
+            <h1>List Of Companies</h1>
+            <ul class="title-link">
+                <li><a href='@Url.Action("ManageCompany", "Company", new { area = "HipoAdmin", id = 0 })' class="addlink"></a></li>
+                <li><a href="#" class="searchlink"></a></li>
+                <li><a href="#" class="upar"></a></li>
+            </ul>
+        </div>
+
+        @if (TempData["Success"] != null || TempData["Delete"] != null || TempData["UpdateSuccess"] != null)
+        {
+        <div class="alert alert-success success_class" id="successMsg">
+            <p style="position: absolute; padding-left: 826px;" id="successMsg1">@TempData["Success"]</p>
+            <p style="position: absolute; padding-left: 826px;" id="successMsg3">@TempData["UpdateSuccess"]</p>
+            <p style="position: absolute; padding-left: 826px;" id="successMsg2">@TempData["Delete"]</p>
+            <a href="javascript:void(0)" style="position: relative" class="closeMsg"><img src="~/images/panel-close.png" /></a>
+        </div>
+        }
+
+        @if (TempData["DeleteError"] != null)
+        {
+            <div class="alert alert-danger error_class" id="errorMsg" style="text-align:center">
+                <p style="position: absolute; padding-left: 690px;" id="errorMsg1">@TempData["DeleteError"]</p>
+                <a href='javascript:void(0)' style="position: relative; padding-right: 1848px" class="closeMsg"><img src="~/images/panel-close.png" /></a>
+            </div>
+        }
+
+        <div class="page-body">
+            <form class="search-panel" id="searchForm">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>Company Name</label>
+                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @type = "text", @id = "txtName" })
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>Company Website</label>
+                            @Html.TextBoxFor(m => m.Website, new { @class = "form-control", @type = "text", @id = "txtWebsite" })
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" id="submit" onclick="BindDataTable();">Search</button>
+                &nbsp;
+                <button type="button" class="btn btn-default" id="reset">Reset</button>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-hover grid" width="100%" id="tblCompanyData"></table>
+            </div>
+            <div class="grid-bottom">
+                <div class="left">
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- CONTENT end -->
+</div>
+<script>
+    $(document).ready(function () {
+        $('#reset').click(function () {
+            $('#txtName').val("");
+            $('#txtWebsite').val("");
+            BindDataTable();
+        })
+        $('.closeMsg').click(function () {
+            $('#successMsg').hide();
+            $('#errorMsg').hide();
+        })
+        BindDataTable();
+    });
+
+        function BindDataTable()
+        {
+            if ($.fn.DataTable.isDataTable("#tblCompanyData"))
+            {
+                $('#tblCompanyData').dataTable().fnDestroy();
+                $('#tblCompanyData').html('<table class="table table-hover grid" width="100%"  id="tblCompanyData"></table>');
+            }
+            $("#tblCompanyData").dataTable({
+                "autoWidth": false,
+                "searching": false,
+                "paging": true,
+                "sPaginationType": "full_numbers",
+                "language": {
+                    "lengthMenu": "Page Size : _MENU_ ",
+                    "info": "Records _START_ to _END_ of (_TOTAL_)",
+                    "emptyTable": "No Record(s) Found"
+                },
+                "processing": true,
+                "serverSide": true,
+                "pageLength": 10,
+                "ajax": {
+                    async: true,
+                    url: '@Url.Action("CompanyDataTable", "Company")',
+                    type: "post",
+                    data: BuildSearchCriteria()
+                },
+                "columns": [
+                    {
+                        "title": "Sr. No.", "data": "Id", "orderable": true,
+                        "render": function (data, row, type, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "title": "Company Name", "data": "Name", "orderable": true },
+                    { "title": "Website", "data": "Website", "orderable": true },
+                    { "title": "Email", "data": "Email", "orderable": true },
+                    { "title": "Edit", "data": "Id", "orderable": false,
+                        "render": function (data, type, row) {
+                            var myUrl = '@Url.Action("ManageCompany", "Company")?id=' + data;
+                            return '<a href=\"' + myUrl + '\"><img src="@Url.Content("~/Areas/HipoAdmin/images/ic-edit.png")"></a>';
+                        }
+                    },
+                    { "title": "Delete", "data": "Id", "orderable": false,
+                        "render": function (data, type, row) {
+                            return '<a href="javascript:void(0)" onclick="DeleteCompany( '+ data +' );"><img src="@Url.Content("~/Areas/HipoAdmin/images/ic-delete.png")"></a>';
+                        }
+                    },
+                    {   "title": "Employee List", "data": "Id", "orderable": false,
+                        "render": function (data, type, row) {
+                            var myUrl = '@Url.Action("Index", "Employee")?companyId=' + data;
+                                return '<a href=\"' + myUrl + '\"><img src="@Url.Content("~/Areas/HipoAdmin/images/ic-attach.png")"></a>';
+                            }
+                    }
+                ],
+                    "drawCallback": function (settings) {
+                        //hide paging and info when empty datattable
+                        var api = this.api();
+                        if (api.rows({ page: 'current' }).data().length <= 0) {
+                            $('#tblCompanyData_info').hide();
+                            $('#tblCompanyData_paginate').hide();
+                            $('#tblCompanyData_length').hide();
+                        }
+                        else {
+                            $('#tblCompanyData_info').show();
+                            $('#tblCompanyData_paginate').show();
+                            $('#tblCompanyData_length').show();
+                        }
+                    }
+                });
+                $('.grid-bottom').addClass('clearfix');
+        }
+
+    function BuildSearchCriteria() {
+        var param = {};
+        param["Name"] = $("#txtName").val();
+        param["Website"] = $("#txtWebsite").val();
+        return param;
+    }
+
+    function DeleteCompany(id) {
+        if (confirm("Are you sure, you want to delete the company?")) {
+            $.ajax( {
+                url: '@Url.Action("DeleteCompany", "Company")',
+                type: 'POST',  // http method
+                data: { id : id },  // data to submit
+                success: function (data) {
+                    location.reload(true);
+                },
+                error: function (xhr, message) {
+                    alert("Data not deleted.");
+                }
+            });
+        }
+    }
+</script>
